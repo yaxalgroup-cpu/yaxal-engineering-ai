@@ -42,26 +42,32 @@ st.sidebar.markdown("---")
 st.sidebar.info("**Estado:** Fase Gratuita")
 
 # ---------------------------------------------------------
-# MÓDULO 1: DASHBOARD PMO (Mantenido)
+# ---------------------------------------------------------
+# MÓDULO 1: DASHBOARD PMO (CONECTADO A GOOGLE SHEETS)
 # ---------------------------------------------------------
 if menu_opcion == "📊 Dashboard PMO":
     st.markdown('<p class="main-header">Control de Proyectos - PMO Yaxal</p>', unsafe_allow_html=True)
     st.markdown("---")
 
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Proyectos Activos", "5")
-    col2.metric("Propuestas en Cotización", "8")
-    col3.metric("Unidades PTAR/Solar", "3")
-    col4.metric("Compromisos Pendientes", "12")
+    # REEMPLAZA ESTA URL CON LA DE TU HOJA YAXAL_DB_MASTER
+    sheet_url = "https://docs.google.com/spreadsheets/d/TU_ID_DE_GOOGLE_SHEETS_AQUI/edit#gid=0"
 
-    st.subheader("Estado de Proyectos en Ejecución (Simulación)")
-    df_proyectos = pd.DataFrame({
-        "ID Proyecto": ["YAX-001", "YAX-002", "YAX-003"],
-        "Cliente": ["Residencial Campestre", "Industrial Park QRO", "Campo Agrícola"],
-        "Unidad": ["Ósmosis Residencial", "PTAR Industrial", "Bombeo Solar"],
-        "Estado": ["En Diseño", "Instalación", "Cotización"]
-    })
-    st.dataframe(df_proyectos, use_container_width=True)
+    try:
+        # Lectura directa desde Google Sheets
+        df_proyectos = pd.read_csv(sheet_url.replace('/edit#gid=0', '/gviz/tq?tqx=out:csv&sheet=Proyectos'))
+        
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Proyectos Registrados", len(df_proyectos))
+        col2.metric("En Cotización", len(df_proyectos[df_proyectos['Estado'] == 'En Cotización']) if 'Estado' in df_proyectos.columns else "0")
+        col3.metric("En Proceso", len(df_proyectos[df_proyectos['Estado'] == 'En Proceso']) if 'Estado' in df_proyectos.columns else "0")
+
+        st.subheader("📋 Tabla de Proyectos (Sincronizada con Google Drive)")
+        st.dataframe(df_proyectos, use_container_width=True)
+
+    except Exception as e:
+        st.warning("Para ver los proyectos en tiempo real, asegúrate de colocar la URL correcta de tu Google Sheet.")
+        st.info("Mostrando vista previa:")
+        st.dataframe(pd.DataFrame({"Mensaje": ["Registra tus datos en el archivo YAXAL_DB_MASTER en Google Drive"]}))
 
 # ---------------------------------------------------------
 # MÓDULO 2: INGENIERÍA HIDRÁULICA & PTAR (Mantenido)
