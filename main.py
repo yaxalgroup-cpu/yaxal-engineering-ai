@@ -21,12 +21,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# BARRA LATERAL (NAVEGACIÓN)
+# BARRA LATERAL (NAVEGACIÓN Y VÍNCULO CON NOTEBOOKLM)
 # ---------------------------------------------------------
 st.sidebar.title("YAXAL AI Engine")
 st.sidebar.caption("PMO & Engineering Assistant v1.2")
 
-# SE AGREGÓ LA OPCIÓN DE INGENIERÍA ELÉCTRICA A LA LISTA DEL MENÚ:
 menu_opcion = st.sidebar.radio(
     "Selecciona un Módulo:",
     [
@@ -37,6 +36,20 @@ menu_opcion = st.sidebar.radio(
         "👨‍🏭 Soldadura & Metalmecánica",
         "📝 Gestión de Minutas e IA"
     ]
+)
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("🧠 Asistentes NotebookLM")
+
+# Enlaces directos a tus cuadernos de NotebookLM
+st.sidebar.link_button(
+    "📘 Asistente de Ingeniería", 
+    "https://notebooklm.google.com/"  # Reemplaza con la URL exacta de tu cuaderno YAXAL_INGENIERIA_Y_CATALOGOS
+)
+
+st.sidebar.link_button(
+    "📋 Asistente PMO y Minutas", 
+    "https://notebooklm.google.com/"  # Reemplaza con la URL exacta de tu cuaderno YAXAL_PMO_Y_MINUTAS
 )
 
 st.sidebar.markdown("---")
