@@ -44,13 +44,11 @@ st.sidebar.subheader("🧠 Asistentes NotebookLM")
 # Enlaces directos a tus cuadernos de NotebookLM
 st.sidebar.link_button(
     "📘 Asistente de Ingeniería", 
-    "https://notebooklm.google.com/"  # Reemplaza con la URL exacta de tu cuaderno YAXAL_INGENIERIA_Y_CATALOGOS
-)
+    "https://notebook.google.com/notebook/34536810-a2bb-48d3-abee-77cd7da15829" )
 
 st.sidebar.link_button(
     "📋 Asistente PMO y Minutas", 
-    "https://notebooklm.google.com/"  # Reemplaza con la URL exacta de tu cuaderno YAXAL_PMO_Y_MINUTAS
-)
+    "https://notebook.google.com/notebook/b3a13d5c-e9f8-4fd9-9018-e89d415fc6cb" )
 
 st.sidebar.markdown("---")
 st.sidebar.info("**Estado:** Conectado a YAXAL_DB_MASTER")
