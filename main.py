@@ -75,7 +75,82 @@ if menu_opcion == "📊 Dashboard PMO":
 
     st.subheader("📋 Tabla de Compromisos y Tareas Asignadas (Google Sheets)")
     st.dataframe(df_tareas, use_container_width=True)
+# ---------------------------------------------------------
+# MÓDULO: INGENIERÍA ELÉCTRICA CONVENCIONAL
+# ---------------------------------------------------------
+elif menu_opcion == "⚡ Ingeniería Eléctrica Convencional":
+    st.markdown('<p class="main-header">⚡ Calculadora Eléctrica Convencional</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Dimensionamiento de cables, potencias, caídas de tensión, tuberías conduit y protecciones.</p>', unsafe_allow_html=True)
+    st.markdown("---")
 
+    tab_el1, tab_el2, tab_el3 = st.tabs(["📏 Calibre de Cable & Caída de Tensión", "🔌 Ley de Ohm & Potencias", "🛡️ Tubería Conduit & Protecciones"])
+
+    with tab_el1:
+        st.subheader("1. Selección de Calibre de Cable (AWG) por Caída de Voltaje")
+        c_e1, c_e2, c_e3 = st.columns(3)
+        
+        with c_e1:
+            tipo_sistema = st.selectbox("Tipo de Sistema:", ["Monofásico (1F - 120V)", "Bifásico / Monofásico (2F - 220V)", "Trifásico (3F - 220V)", "Trifásico (3F - 440V)"])
+            potencia_kw = st.number_input("Carga / Potencia (kW):", min_value=0.1, value=5.0, step=0.5)
+            factor_potencia = st.slider("Factor de Potencia (FP):", 0.70, 1.00, 0.90)
+            
+        with c_e2:
+            longitud_cable_m = st.number_input("Longitud del Alimentador (metros):", min_value=1.0, value=30.0, step=5.0)
+            caida_max_porcentaje = st.slider("Caída de Tensión Máxima Permitida (%):", 1.0, 5.0, 3.0)
+            
+        with c_e3:
+            # Determinación de Voltaje y Corriente
+            voltaje = 120 if "120V" in tipo_sistema else (220 if "220V" in tipo_sistema else 440)
+            
+            if "Trifásico" in tipo_sistema:
+                corriente_amp = (potencia_kw * 1000) / (math.sqrt(3) * voltaje * factor_potencia)
+            else:
+                corriente_amp = (potencia_kw * 1000) / (voltaje * factor_potencia)
+                
+            st.metric("Corriente Nominal (I)", f"{corriente_amp:.2f} A")
+            
+            # Estimación de Calibre Sugerido según Corriente Nominal (Ampacidad básica a 75°C)
+            if corriente_amp <= 15: calibre_amp = "14 AWG"
+            elif corriente_amp <= 20: calibre_amp = "12 AWG"
+            elif corriente_amp <= 30: calibre_amp = "10 AWG"
+            elif corriente_amp <= 50: calibre_amp = "8 AWG"
+            elif corriente_amp <= 65: calibre_amp = "6 AWG"
+            elif corriente_amp <= 85: calibre_amp = "4 AWG"
+            elif corriente_amp <= 115: calibre_amp = "2 AWG"
+            else: calibre_amp = "1/0 AWG o mayor"
+            
+            st.success(f"**Calibre sugerido por corriente:** {calibre_amp}")
+            st.caption(f"Calculado para corriente continua a 125%: {corriente_amp * 1.25:.2f} A")
+
+    with tab_el2:
+        st.subheader("2. Relación Voltaje, Corriente, Resistencia y Potencia")
+        c_o1, c_o2 = st.columns(2)
+        with c_o1:
+            v_val = st.number_input("Voltaje (V):", value=220.0)
+            r_val = st.number_input("Resistencia (Ohms - Ω):", value=10.0)
+        with c_o2:
+            i_calc = v_val / r_val if r_val > 0 else 0
+            p_calc = (v_val ** 2) / r_val if r_val > 0 else 0
+            st.metric("Corriente Resultante (I)", f"{i_calc:.2f} A")
+            st.metric("Potencia Disipada (P)", f"{p_calc:.2f} W ({p_calc/1000:.2f} kW)")
+
+    with tab_el3:
+        st.subheader("3. Ocupación de Tubería Conduit y Protección Termomagnética")
+        col_t1, col_t2 = st.columns(2)
+        with col_t1:
+            num_conductores = st.number_input("Número de Conductores en la tubería:", min_value=1, value=4)
+            calibre_tubo = st.selectbox("Calibre de los cables:", ["14 AWG", "12 AWG", "10 AWG", "8 AWG", "6 AWG", "4 AWG"])
+        with col_t2:
+            # Regla de ocupación >2 conductores = max 40% del área interna del tubo
+            if calibre_tubo in ["14 AWG", "12 AWG", "10 AWG"] and num_conductores <= 4:
+                tubo_sugerido = '1/2" Conduit'
+            elif calibre_tubo in ["10 AWG", "8 AWG"] and num_conductores <= 6:
+                tubo_sugerido = '3/4" Conduit'
+            else:
+                tubo_sugerido = '1" Conduit o superior'
+                
+            st.metric("Diámetro de Tubería Recomendado", tubo_sugerido)
+            st.info(f"Protección Termomagnética (Breaker) recomendada: **{math.ceil(corriente_amp * 1.25)} A**")
 # ---------------------------------------------------------
 # MÓDULO 2: INGENIERÍA HIDRÁULICA & PTAR
 # ---------------------------------------------------------
