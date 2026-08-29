@@ -49,26 +49,25 @@ menu_opcion = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.subheader("🧠 Asistentes NotebookLM")
 
-# Asistente de Ingeniería Técnico Global (Compartido)
+# Asistente de Ingeniería Técnico Global (URL Directa)
 st.sidebar.link_button(
     "📘 Asistente de Ingeniería (Global)", 
-    "https://notebooklm.google.com/"  # Reemplaza con la URL de YAXAL_INGENIERIA_Y_CATALOGOS
+    "https://gemini.google.com/notebook/34536810-a2bb-48d3-abee-77cd7da15829"
 )
 
-# Asistente PMO según Entorno Seleccionado
+# Asistente PMO según Entorno Seleccionado (URLs Directas)
 if empresa_activa == "Grupo Industrial YAXAL":
     st.sidebar.link_button(
         "📋 PMO YAXAL (Minutas & Tareas)", 
-        "https://notebooklm.google.com/"  # Reemplaza con la URL de YAXAL_PMO_Y_MINUTAS
+        "https://gemini.google.com/notebook/b3a13d5c-e9f8-4fd9-9018-e89d415fc6cb"
     )
     st.sidebar.info("**Estado:** Conectado a YAXAL_DB_MASTER")
 else:
     st.sidebar.link_button(
         "🏢 PMO CWS México (Minutas & Tareas)", 
-        "https://notebooklm.google.com/"  # Reemplaza con la URL de CWS_PMO_Y_MINUTAS
+        "https://gemini.google.com/notebook/875ec975-6098-479b-b959-7e82a960f933"
     )
     st.sidebar.info("**Estado:** Conectado a CWS_DB_MASTER")
-
 # ---------------------------------------------------------
 # FUNCIÓN DE LECTURA DE GOOGLE SHEETS (DINÁMICA POR EMPRESA)
 # ---------------------------------------------------------
