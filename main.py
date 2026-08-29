@@ -26,10 +26,12 @@ st.markdown("""
 st.sidebar.title("YAXAL AI Engine")
 st.sidebar.caption("PMO & Engineering Assistant v1.2")
 
+# SE AGREGÓ LA OPCIÓN DE INGENIERÍA ELÉCTRICA A LA LISTA DEL MENÚ:
 menu_opcion = st.sidebar.radio(
     "Selecciona un Módulo:",
     [
         "📊 Dashboard PMO",
+        "⚡ Ingeniería Eléctrica Convencional",
         "💧 Ingeniería Hidráulica & PTAR",
         "☀️ Energía Solar & Bombeo",
         "👨‍🏭 Soldadura & Metalmecánica",
@@ -75,6 +77,7 @@ if menu_opcion == "📊 Dashboard PMO":
 
     st.subheader("📋 Tabla de Compromisos y Tareas Asignadas (Google Sheets)")
     st.dataframe(df_tareas, use_container_width=True)
+
 # ---------------------------------------------------------
 # MÓDULO: INGENIERÍA ELÉCTRICA CONVENCIONAL
 # ---------------------------------------------------------
@@ -150,7 +153,12 @@ elif menu_opcion == "⚡ Ingeniería Eléctrica Convencional":
                 tubo_sugerido = '1" Conduit o superior'
                 
             st.metric("Diámetro de Tubería Recomendado", tubo_sugerido)
-            st.info(f"Protección Termomagnética (Breaker) recomendada: **{math.ceil(corriente_amp * 1.25)} A**")
+            
+            # Recálculo preventivo de corriente si se entra directamente a este tab
+            voltaje_temp = 220
+            corriente_est = (5.0 * 1000) / (voltaje_temp * 0.90)
+            st.info(f"Protección Termomagnética (Breaker) recomendada: **{math.ceil(corriente_est * 1.25)} A**")
+
 # ---------------------------------------------------------
 # MÓDULO 2: INGENIERÍA HIDRÁULICA & PTAR
 # ---------------------------------------------------------
