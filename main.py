@@ -21,10 +21,18 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# BARRA LATERAL (NAVEGACIÓN Y VÍNCULO CON NOTEBOOKLM)
+# BARRA LATERAL (ENTORNO Y NAVEGACIÓN)
 # ---------------------------------------------------------
 st.sidebar.title("YAXAL AI Engine")
-st.sidebar.caption("PMO & Engineering Assistant v1.2")
+st.sidebar.caption("PMO & Engineering Assistant v1.3")
+
+# Selector de Entorno Operativo (Multi-Empresa)
+empresa_activa = st.sidebar.selectbox(
+    "🏢 Entorno de Trabajo:",
+    ["Grupo Industrial YAXAL", "CWS México"]
+)
+
+st.sidebar.markdown("---")
 
 menu_opcion = st.sidebar.radio(
     "Selecciona un Módulo:",
@@ -41,56 +49,69 @@ menu_opcion = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.subheader("🧠 Asistentes NotebookLM")
 
-# Enlaces directos a tus cuadernos de NotebookLM
+# Asistente de Ingeniería Técnico Global (Compartido)
 st.sidebar.link_button(
-    "📘 Asistente de Ingeniería", 
-    "https://notebook.google.com/notebook/34536810-a2bb-48d3-abee-77cd7da15829" )
+    "📘 Asistente de Ingeniería (Global)", 
+    "https://notebooklm.google.com/"  # Reemplaza con la URL de YAXAL_INGENIERIA_Y_CATALOGOS
+)
 
-st.sidebar.link_button(
-    "📋 Asistente PMO y Minutas", 
-    "https://notebook.google.com/notebook/b3a13d5c-e9f8-4fd9-9018-e89d415fc6cb" )
-
-st.sidebar.markdown("---")
-st.sidebar.info("**Estado:** Conectado a YAXAL_DB_MASTER")
+# Asistente PMO según Entorno Seleccionado
+if empresa_activa == "Grupo Industrial YAXAL":
+    st.sidebar.link_button(
+        "📋 PMO YAXAL (Minutas & Tareas)", 
+        "https://notebooklm.google.com/"  # Reemplaza con la URL de YAXAL_PMO_Y_MINUTAS
+    )
+    st.sidebar.info("**Estado:** Conectado a YAXAL_DB_MASTER")
+else:
+    st.sidebar.link_button(
+        "🏢 PMO CWS México (Minutas & Tareas)", 
+        "https://notebooklm.google.com/"  # Reemplaza con la URL de CWS_PMO_Y_MINUTAS
+    )
+    st.sidebar.info("**Estado:** Conectado a CWS_DB_MASTER")
 
 # ---------------------------------------------------------
-# FUNCIÓN DE LECTURA DE GOOGLE SHEETS
+# FUNCIÓN DE LECTURA DE GOOGLE SHEETS (DINÁMICA POR EMPRESA)
 # ---------------------------------------------------------
-def cargar_tareas_sheet():
+def cargar_tareas_sheet(empresa):
+    nombre_doc = "YAXAL_DB_MASTER" if empresa == "Grupo Industrial YAXAL" else "CWS_DB_MASTER"
     try:
-        # Intenta autenticación pública o directa por enlace
         gc = gspread.public()
-        doc = gc.open("YAXAL_DB_MASTER")
+        doc = gc.open(nombre_doc)
         hoja = doc.worksheet("Compromisos_y_Tareas")
         datos = hoja.get_all_records()
         return pd.DataFrame(datos)
     except Exception as e:
-        # Datos de respaldo en caso de que requiera autenticación privada
-        return pd.DataFrame([
-            {"ID_Tarea": "TAR-001", "ID_Proyecto": "YAX-GENERAL", "Descripcion": "Entrega de cotización filtro PTAR", "Responsable": "Ing. Juan", "Fecha_Limite": "Viernes", "Estado": "Pendiente"}
-        ])
+        # Datos de respaldo según la empresa
+        if empresa == "Grupo Industrial YAXAL":
+            return pd.DataFrame([
+                {"ID_Tarea": "YAX-TAR-001", "ID_Proyecto": "YAX-GEN", "Descripcion": "Cotización filtro PTAR", "Responsable": "Ing. Juan", "Fecha_Limite": "Viernes", "Estado": "Pendiente"}
+            ])
+        else:
+            return pd.DataFrame([
+                {"ID_Tarea": "CWS-TAR-001", "ID_Proyecto": "CWS-OBRA-01", "Descripcion": "Revisión de avance de obra hidráulica", "Responsable": "Director CWS", "Fecha_Limite": "Lunes", "Estado": "En Proceso"}
+            ])
 
 # ---------------------------------------------------------
 # MÓDULO 1: DASHBOARD PMO
 # ---------------------------------------------------------
 if menu_opcion == "📊 Dashboard PMO":
-    st.markdown('<p class="main-header">Control de Proyectos - PMO Yaxal</p>', unsafe_allow_html=True)
+    st.markdown(f'<p class="main-header">Control de Proyectos - PMO ({empresa_activa})</p>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Monitoreo en tiempo real de proyectos y compromisos asignados por voz/IA.</p>', unsafe_allow_html=True)
     st.markdown("---")
 
-    df_tareas = cargar_tareas_sheet()
+    df_tareas = cargar_tareas_sheet(empresa_activa)
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Proyectos Activos", "5")
-    col2.metric("Propuestas en Cotización", "8")
-    col3.metric("Unidades PTAR/Solar", "3")
+    col1.metric("Entorno Activo", empresa_activa.split()[0])
+    col2.metric("Proyectos Activos", "5")
+    col3.metric("Unidades de Ingeniería", "3")
     col4.metric("Compromisos Registrados", str(len(df_tareas)))
 
-    st.subheader("📋 Tabla de Compromisos y Tareas Asignadas (Google Sheets)")
+    st.subheader(f"📋 Compromisos y Tareas ({empresa_activa})")
     st.dataframe(df_tareas, use_container_width=True)
 
 # ---------------------------------------------------------
-# MÓDULO: INGENIERÍA ELÉCTRICA CONVENCIONAL
+# MÓDULO 2: INGENIERÍA ELÉCTRICA CONVENCIONAL
 # ---------------------------------------------------------
 elif menu_opcion == "⚡ Ingeniería Eléctrica Convencional":
     st.markdown('<p class="main-header">⚡ Calculadora Eléctrica Convencional</p>', unsafe_allow_html=True)
@@ -113,7 +134,6 @@ elif menu_opcion == "⚡ Ingeniería Eléctrica Convencional":
             caida_max_porcentaje = st.slider("Caída de Tensión Máxima Permitida (%):", 1.0, 5.0, 3.0)
             
         with c_e3:
-            # Determinación de Voltaje y Corriente
             voltaje = 120 if "120V" in tipo_sistema else (220 if "220V" in tipo_sistema else 440)
             
             if "Trifásico" in tipo_sistema:
@@ -123,7 +143,6 @@ elif menu_opcion == "⚡ Ingeniería Eléctrica Convencional":
                 
             st.metric("Corriente Nominal (I)", f"{corriente_amp:.2f} A")
             
-            # Estimación de Calibre Sugerido según Corriente Nominal (Ampacidad básica a 75°C)
             if corriente_amp <= 15: calibre_amp = "14 AWG"
             elif corriente_amp <= 20: calibre_amp = "12 AWG"
             elif corriente_amp <= 30: calibre_amp = "10 AWG"
@@ -155,7 +174,6 @@ elif menu_opcion == "⚡ Ingeniería Eléctrica Convencional":
             num_conductores = st.number_input("Número de Conductores en la tubería:", min_value=1, value=4)
             calibre_tubo = st.selectbox("Calibre de los cables:", ["14 AWG", "12 AWG", "10 AWG", "8 AWG", "6 AWG", "4 AWG"])
         with col_t2:
-            # Regla de ocupación >2 conductores = max 40% del área interna del tubo
             if calibre_tubo in ["14 AWG", "12 AWG", "10 AWG"] and num_conductores <= 4:
                 tubo_sugerido = '1/2" Conduit'
             elif calibre_tubo in ["10 AWG", "8 AWG"] and num_conductores <= 6:
@@ -164,14 +182,11 @@ elif menu_opcion == "⚡ Ingeniería Eléctrica Convencional":
                 tubo_sugerido = '1" Conduit o superior'
                 
             st.metric("Diámetro de Tubería Recomendado", tubo_sugerido)
-            
-            # Recálculo preventivo de corriente si se entra directamente a este tab
-            voltaje_temp = 220
-            corriente_est = (5.0 * 1000) / (voltaje_temp * 0.90)
+            corriente_est = (5.0 * 1000) / (220 * 0.90)
             st.info(f"Protección Termomagnética (Breaker) recomendada: **{math.ceil(corriente_est * 1.25)} A**")
 
 # ---------------------------------------------------------
-# MÓDULO 2: INGENIERÍA HIDRÁULICA & PTAR
+# MÓDULO 3: INGENIERÍA HIDRÁULICA & PTAR
 # ---------------------------------------------------------
 elif menu_opcion == "💧 Ingeniería Hidráulica & PTAR":
     st.markdown('<p class="main-header">Cálculo Hidráulico (Hazen-Williams)</p>', unsafe_allow_html=True)
@@ -193,7 +208,7 @@ elif menu_opcion == "💧 Ingeniería Hidráulica & PTAR":
         st.caption(f"Caudal equivalente: {q_lps:.2f} L/s")
 
 # ---------------------------------------------------------
-# MÓDULO 3: ENERGÍA SOLAR & BOMBEO
+# MÓDULO 4: ENERGÍA SOLAR & BOMBEO
 # ---------------------------------------------------------
 elif menu_opcion == "☀️ Energía Solar & Bombeo":
     st.markdown('<p class="main-header">☀️ Ingeniería Solar Fotovoltaica</p>', unsafe_allow_html=True)
@@ -214,7 +229,7 @@ elif menu_opcion == "☀️ Energía Solar & Bombeo":
         st.success(f"**Paneles Recomendados:** {num_paneles} módulos de {potencia_panel_w}W")
 
 # ---------------------------------------------------------
-# MÓDULO 4: SOLDADURA & METALMECÁNICA
+# MÓDULO 5: SOLDADURA & METALMECÁNICA
 # ---------------------------------------------------------
 elif menu_opcion == "👨‍🏭 Soldadura & Metalmecánica":
     st.markdown('<p class="main-header">👨‍🏭 Cálculos de Soldadura y Materiales</p>', unsafe_allow_html=True)
@@ -233,9 +248,9 @@ elif menu_opcion == "👨‍🏭 Soldadura & Metalmecánica":
         st.success(f"**Kilos de Electrodo E7018 a Comprar:** {peso_electrodo_requerido:.1f} kg")
 
 # ---------------------------------------------------------
-# MÓDULO 5: GESTIÓN DE MINUTAS
+# MÓDULO 6: GESTIÓN DE MINUTAS
 # ---------------------------------------------------------
 elif menu_opcion == "📝 Gestión de Minutas e IA":
-    st.markdown('<p class="main-header">Transcripción de Reuniones y Compromisos</p>', unsafe_allow_html=True)
+    st.markdown(f'<p class="main-header">Transcripción de Reuniones ({empresa_activa})</p>', unsafe_allow_html=True)
     st.markdown("---")
-    st.info("Para ingresar audios nuevos, ejecuta la celda de Google Colab. La tabla del Dashboard PMO se actualizará automáticamente.")
+    st.info(f"Para ingresar audios nuevos de {empresa_activa}, ejecuta la celda de Google Colab. La tabla del Dashboard PMO se actualizará automáticamente.")
